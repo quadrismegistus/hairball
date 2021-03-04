@@ -85,7 +85,7 @@ class Hairball():
         if 'output=csv' in url_or_path or url_or_path.endswith('.csv'):
             return self.from_csv(url_or_path)
     
-    def from_csv(self,url_or_path,col_id='id',col_edges='Relations'):
+    def from_csv(self,url_or_path,col_id='id',col_edges='rels'):
         ### Format
         path = self.get_url_or_path(url_or_path)
         
@@ -103,8 +103,14 @@ class Hairball():
             for e in edgestr.split(';'):
                 if not ')' in e: continue
                 reltype,etrgt=e.replace('(','').strip().split(')',1)
-                edx = {'source':idx, 'target':etrgt.strip(), 'reltype':reltype.strip()}
-                eld.append(edx)
+                etrgtmeta=''
+                if '[' in etrgt:
+                    etrgt,etrgtmeta=etrgt.split('[',1)
+                    etrgtmeta.replace(']','').strip()
+                etrgt=etrgt.strip()
+                for etrgtx in etrgt.split(','):
+                    edx = {'source':idx, 'target':etrgtx.strip(), 'reltype':reltype.strip(), 'meta':etrgtmeta}
+                    eld.append(edx)
         self.df_edges = pd.DataFrame(eld)
         # from df
         self.df2nx()
